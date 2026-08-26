@@ -1,5 +1,5 @@
 export function requireAuth(req, res, next) {
-  if (!req.session.userId) return res.status(401).json({ error: 'FaÃ§a login para continuar.' });
+  if (!req.session.userId) return res.status(401).json({ error: 'Faça login para continuar.' });
   next();
 }
 
