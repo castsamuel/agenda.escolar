@@ -1,11 +1,11 @@
-# DependÃªncias instaladas localmente
+# Dependências instaladas localmente
 node_modules/
 
-# Dados locais e sessÃµes
+# Dados locais e sessões
 backend/database/*.db
 backend/database/*.db-*
 
-# ConfiguraÃ§Ãµes privadas
+# Configurações privadas
 .env
 .env.*
 !.env.example
