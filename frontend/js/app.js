@@ -1,6 +1,25 @@
 const $=s=>document.querySelector(s); const $$=s=>[...document.querySelectorAll(s)];
 const state={date:new Date(),view:'month',data:{subjects:[],activities:[],school:null},user:null};
-const api=async(path,options={})=>{const r=await fetch('/api'+path,{headers:{'Content-Type':'application/json'},...options});if(!r.ok){const e=await r.json().catch(()=>({}));throw Error(e.error||'Não foi possível concluir esta ação.')}return r.status===204?null:r.json()};
+// No GitHub Pages, os dados ficam somente neste navegador. No servidor local, a API SQLite continua sendo usada.
+const staticMode=location.hostname.endsWith('github.io');
+const readStore=()=>JSON.parse(localStorage.getItem('agendaEscolarDados')||'{"user":null,"schools":[],"subjects":[],"activities":[]}');
+const saveStore=data=>localStorage.setItem('agendaEscolarDados',JSON.stringify(data));
+const staticApi=async(path,options)=>{const body=options.body?JSON.parse(options.body):{};const data=readStore();const logged=localStorage.getItem('agendaEscolarAtual');const fail=message=>{throw Error(message)};const nextId=list=>Math.max(0,...list.map(x=>x.id||0))+1;
+ if(path==='/auth/status')return {configured:!!data.user,user:logged&&data.user?.id===Number(logged)?data.user:null};
+ if(path==='/auth/setup'){if(data.user)fail('A conta inicial já foi configurada.');if(!body.username?.trim()||body.password?.length<6||body.password!==body.confirmation)fail('Informe um usuário e uma senha de pelo menos 6 caracteres. As senhas devem coincidir.');data.user={id:1,username:body.username.trim(),password:body.password,theme:'light'};saveStore(data);localStorage.setItem('agendaEscolarAtual','1');return {user:data.user}}
+ if(path==='/auth/login'){if(!data.user||data.user.username!==body.username?.trim()||data.user.password!==body.password)fail('Usuário ou senha inválidos.');localStorage.setItem('agendaEscolarAtual',data.user.id);return {user:data.user}}
+ if(path==='/auth/logout'){localStorage.removeItem('agendaEscolarAtual');return null}
+ if(!logged)fail('Faça login para continuar.');
+ if(path==='/bootstrap'){const school=[...data.schools].sort((a,b)=>b.is_selected-a.is_selected)[0]||null;const activities=data.activities.map(a=>({...a,subject_name:data.subjects.find(s=>s.id===Number(a.subject_id))?.name||null,subject_color:data.subjects.find(s=>s.id===Number(a.subject_id))?.color||null,status:a.status==='concluido'?'concluido':a.due_date<today()?'atrasado':a.status}));return {school,subjects:data.subjects,activities}}
+ if(path==='/schools'&&options.method==='POST'){data.schools.forEach(s=>s.is_selected=0);const item={id:nextId(data.schools),...body,is_selected:1};data.schools.push(item);saveStore(data);return item}
+ if(path==='/subjects'&&options.method==='POST'){const item={id:nextId(data.subjects),...body};data.subjects.push(item);saveStore(data);return item}
+ if(path==='/activities'&&options.method==='POST'){if(!body.title?.trim()||!body.type||!body.due_date)fail('Título, tipo e data são obrigatórios.');data.activities.push({id:nextId(data.activities),...body,subject_id:body.subject_id?Number(body.subject_id):null});saveStore(data);return {id:data.activities.at(-1).id}}
+ const match=path.match(/^\/activities\/(\d+)$/);if(match&&options.method==='PUT'){const i=data.activities.findIndex(a=>a.id===Number(match[1]));if(i<0)fail('Atividade não encontrada.');data.activities[i]={...data.activities[i],...body,subject_id:body.subject_id?Number(body.subject_id):null};saveStore(data);return null}
+ if(match&&options.method==='DELETE'){data.activities=data.activities.filter(a=>a.id!==Number(match[1]));saveStore(data);return null}
+ if(path==='/theme'){data.user.theme=body.theme;saveStore(data);return {theme:body.theme}}
+ return fail('Ação não disponível nesta versão.');
+};
+const api=async(path,options={})=>{if(staticMode)return staticApi(path,options);const r=await fetch('/api'+path,{headers:{'Content-Type':'application/json'},...options});if(!r.ok){const e=await r.json().catch(()=>({}));throw Error(e.error||'Não foi possível concluir esta ação.')}return r.status===204?null:r.json()};
 const pad=n=>String(n).padStart(2,'0'); const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; const today=()=>iso(new Date());
 const dates={week:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']};
 function toast(message){const t=$('#toast');t.textContent=message;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800)}
