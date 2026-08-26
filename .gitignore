@@ -1,0 +1,17 @@
+# DependÃªncias instaladas localmente
+node_modules/
+
+# Dados locais e sessÃµes
+backend/database/*.db
+backend/database/*.db-*
+
+# ConfiguraÃ§Ãµes privadas
+.env
+.env.*
+!.env.example
+
+# Arquivos do sistema/editor
+.DS_Store
+Thumbs.db
+.vscode/
+
