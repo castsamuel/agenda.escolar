@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Agenda Escolar</title>
+<meta name="description" content="Agenda escolar digital: matérias, notas, deveres, trabalhos, calendário, desempenho e diário pessoal." />
+<meta name="theme-color" content="#3457D5" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="icon" href="./public/icons/icon-192.png" />
+<link rel="apple-touch-icon" href="./public/icons/icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./src/styles/main.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+</head>
+<body>
+<div id="app"></div>
+<!-- app.bundle.js é gerado a partir dos arquivos em src/js/ (veja README).
+     Usamos um script "normal" (sem type="module") de propósito: assim o site
+     funciona tanto abrindo o index.html direto no navegador quanto publicado
+     no GitHub Pages, sem esbarrar nas restrições de CORS que módulos ES
+     sofrem quando servidos via file://. -->
+<script src="./src/js/app.bundle.js"></script>
+</body>
+</html>
